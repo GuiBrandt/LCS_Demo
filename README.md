@@ -20,8 +20,6 @@ Mesma árvore, mas para um LCS com memorização (92 chamadas a `LCS`):
 
 Legenda: Cinza = as sequências terminam com o mesmo caractere, Vermelho = as sequências não terminam com o mesmo caractere, Verde = salvo no memo, Branco = uma ou mais sequências vazias
 
----
-
 ## Tabela de memorização
 
 ![Tabela de memorização](https://i.imgur.com/a2xOUQQ.png)
