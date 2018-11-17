@@ -13,8 +13,9 @@ size_t memo_r, memo_c;
  * 
  * @param memo Matriz de memorização
  */
-void log_memo(string*** memo) {
+void log_memo(string*** memo, size_t m, size_t n) {
     ofstream memo_file("memo_log", ios::app);
+    memo_file << m << " " << n << endl;
     for (int i = 0; i < memo_r; i++) {
         for (int j = 0; j < memo_c; j++) {
             if (memo[i][j])
@@ -170,7 +171,7 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** 
         gv_node(callid, "color=white");
 
     memo[m][n] = new string(result);
-    log_memo(memo);
+    log_memo(memo, m, n);
 
     return result;
 }
