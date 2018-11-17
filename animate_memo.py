@@ -40,7 +40,7 @@ def __create_table(a, b, memo):
     return table, cells
 
 def __compute_accesses(a, b, m, n, accesses):
-    if a[m - 1] == b[n - 1]:
+    if a[m] == b[n]:
         if m > 0 and n > 0:
             accesses[m - 1][n - 1] += 1
     else:
@@ -71,8 +71,8 @@ if __name__ == "__main__":
         accesses.append([0] * len(b))
 
     # Função de normalização para a matriz: Cada célula é usada
-    # no mínimo 0 vezes e no máximo 3
-    normal = plt.Normalize(-1, 4)
+    # no mínimo 1 vezes e no máximo 3
+    normal = plt.Normalize(0, 4)
 
     while True:
         step += 1
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         original_face_color = current_cell.get_facecolor()
         original_text_color = current_cell.get_text().get_color()
 
-        for i, j in [(m, n), (m - 1, n - 1), (m - 1, n), (m, n - 1)]:
+        for i, j in [(m, n)] + ([(m - 1, n - 1)] if a[m] == b[n] else [(m - 1, n), (m, n - 1)]):
             if i < 0 or j < 0:
                 continue
 
