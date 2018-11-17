@@ -22,6 +22,8 @@ Legenda: Cinza = as sequências terminam com o mesmo caractere, Vermelho = as se
 
 ## Tabela de memorização
 
-![Tabela de memorização](https://i.imgur.com/a2xOUQQ.png)
+![Tabela de memorização](https://i.imgur.com/xh1ObWE.png)
 
 Cada linha representa um caractere da sequência `asdasdasd` e cada coluna representa um caractere da sequência `bsdbsdbsd`. Considere que as legendas das linhas e colunas são cumulativas. O valor da célula (i, j) é o LCS da substring de `asdasdasd` de 0 até i e da substring de `bsdbsdbsd` de 0 até j.
+
+As cores na matriz representam a frequência de uso de cada célula, de forma que tons mais próximos do amarelo representam células com maior frequência. A cor branca indica células que não foram usadas para chegar à resposta (isso inclui a própria resposta).

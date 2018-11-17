@@ -1,7 +1,52 @@
 import io
 import matplotlib.pyplot as plt
 
-from time import sleep
+def __read_state(file):
+    memo = []
+    
+    line = file.readline().strip("\r\n")
+    if line == "":
+        return (None, None, None)
+
+    m, n = map(int, line.split(" "))
+
+    line = file.readline().strip("\r\n")
+    while line != "":
+        memo.append(line.split(";")[:-1])
+        line = file.readline().strip("\r\n")
+
+    return m, n, memo
+
+def __create_table(a, b, memo):
+    table = plt.table(
+        cellText=memo,
+        rowLabels=["  %s  " % (x) for x in a],
+        colLabels=list(b),
+        loc='center',
+        cellLoc='center'
+    )
+    cells = table.get_celld()
+
+    table_cells=table.get_children()
+    for cell in table_cells:
+        cell.set_width(1.0 / (len(b) + 1))
+        cell.set_height(1.0 / (len(a) + 1))
+        cell.set_fontsize(14)
+
+    for c, cell in cells.items():
+        if c[0] > 0 and c[1] >= 0:
+            cell.set_fill(True)
+
+    return table, cells
+
+def __compute_accesses(a, b, m, n, accesses):
+    if a[m - 1] == b[n - 1]:
+        if m > 0 and n > 0:
+            accesses[m - 1][n - 1] += 1
+    else:
+        for c in [(m - 1, n), (m, n - 1)]:
+            if c[0] >= 0 and c[1] >= 0:
+                accesses[c[0]][c[1]] += 1
 
 if __name__ == "__main__":
     
@@ -9,105 +54,79 @@ if __name__ == "__main__":
     a = " " + file.readline().strip("\r\n")
     b = " " + file.readline().strip("\r\n")
 
+    # Configuração do PyPlot
     plt.ion()
     plt.axis('off')
     plt.rcParams["font.family"] = "serif"
 
+    # Variáveis de controle
     table = None
     caption = None
+
     step = 0
 
+    # Tabela de acessos por célula da matriz
     accesses = []
     for _ in range(len(a)):
         accesses.append([0] * len(b))
 
+    # Função de normalização para a matriz: Cada célula é usada
+    # no mínimo 0 vezes e no máximo 3
     normal = plt.Normalize(-1, 4)
 
     while True:
         step += 1
-        
-        line = file.readline()
-        if line == "":
+
+        m, n, state = __read_state(file)
+
+        if state is None:
             break
 
-        cell_text = []
+        memo = state
 
-        m, n = map(int, line.split(" "))
-
-        if a[m - 1] == b[n - 1]:
-            if m > 0 and n > 0:
-                accesses[m - 1][n - 1] += 1
-
-        else:
-            for tp in [(m - 1, n), (m, n - 1)]:
-                if tp[0] >= 0 and tp[1] >= 0:
-                    accesses[tp[0]][tp[1]] += 1
-
-        line = file.readline().strip("\r\n")
-        while line != "":
-            cell_text.append(line.split(";")[:-1])
-            line = file.readline().strip("\r\n")
+        __compute_accesses(a, b, m, n, accesses)
 
         if table is None:
-            table = plt.table(
-                cellText=cell_text,
-                rowLabels=["  %s  " % (x) for x in a],
-                colLabels=list(b),
-                loc='center',
-                cellLoc='center'
-            )
+            table, cells = __create_table(a, b, memo)
 
-            table_cells=table.get_children()
-            for cell in table_cells:
-                cell.set_width(1.0 / (len(b) + 1))
-                cell.set_height(1.0 / (len(a) + 1))
-                cell.set_fontsize(14)
-
-            for c, cell in table.get_celld().items():
-                if c[0] > 0 and c[1] >= 0:
-                    cell.set_fill(True)
-
-        colors = plt.cm.viridis(normal(accesses))
-        cells = table.get_celld()
         current_cell = cells[m + 1, n]
 
-        last_fc = current_cell.get_fc()
-        last_tc = current_cell.get_text().get_color()
+        original_face_color = current_cell.get_facecolor()
+        original_text_color = current_cell.get_text().get_color()
 
-        for c in [(m, n), (m - 1, n - 1), (m - 1, n), (m, n - 1)]:
-            i, j = c
-
+        for i, j in [(m, n), (m - 1, n - 1), (m - 1, n), (m, n - 1)]:
             if i < 0 or j < 0:
                 continue
 
             cell = cells[i + 1, j]
-            cell.get_text().set_text(cell_text[i][j])
+            cell.get_text().set_text(memo[i][j])
 
             if cell == current_cell:
                 cell.set_fc("red")
-                cell.get_text().set_color("white")
             else:
-                cell.set_fc(colors[i][j])
-                cell.get_text().set_color("white")
+                color = plt.cm.viridis(normal(accesses[i][j]))
+                cell.set_fc(color)
+
+            cell.get_text().set_color("white")
 
         if caption is None:
-            caption = plt.text(0, 1.1, "", fontsize=16)
+            caption = plt.text(0, 1.1, "", fontsize=14)
 
         caption.set_text('Step: %d      m: %d       n: %d' % (step, m, n))
         
         plt.draw()
         plt.pause(0.01)
 
-        current_cell.set_fc(last_fc)
-        current_cell.get_text().set_color(last_tc)
+        current_cell.set_fc(original_face_color)
+        current_cell.get_text().set_color(original_text_color)
 
     plt.ioff()
     caption = plt.text(
         0, -0.1, 
         "Finished: LCS is \"%s\", %d memo accesses" % (
-            cell_text[len(a) - 1][len(b) - 1],
+            memo[len(a) - 1][len(b) - 1],
             sum([item for sub in accesses for item in sub])), 
-            fontsize=16
+            fontsize=14
         )
 
     plt.show()
