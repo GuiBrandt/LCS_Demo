@@ -1,9 +1,18 @@
 #include "lcs.hpp"
 #include <iostream>
 
+//! Id de chamada da função, usado para plotagem dos gráficos no GraphView
 int callid = 0;
+
+//! Nome do arquivo do GraphView
 string gv_file;
 
+/**
+ * @brief Define propriedades de um nó por número no gráfico
+ * 
+ * @param number Número do nó
+ * @param attr Atributos do nó
+ */
 void gv_node(int number, const string& attr = "") {
     call_graph.open(gv_file, ios::app);
 
@@ -15,6 +24,15 @@ void gv_node(int number, const string& attr = "") {
     call_graph.close();
 }
 
+/**
+ * @brief Define a label de um nó a partir dos parâmetros da função `lcs`
+ * 
+ * @param number Número do nó
+ * @param a String A
+ * @param b String B
+ * @param m Tamanho da string A
+ * @param n Tamanho da string B
+ */
 void gv_label(int number, const string& a, const string& b, size_t m, size_t n) {
     gv_node(
         number,
@@ -26,6 +44,12 @@ void gv_label(int number, const string& a, const string& b, size_t m, size_t n) 
     );
 }
 
+/**
+ * @brief Liga dois nós
+ * 
+ * @param from Nó de saída
+ * @param to Nó de entrada
+ */
 void gv_edge(int from, int to) {
     call_graph.open(gv_file, ios::app);
     call_graph  << "node" << from 
@@ -35,6 +59,7 @@ void gv_edge(int from, int to) {
     call_graph.close();
 }
 
+// LCS ruinzão, sem memo
 string lcs_bad(const string& a, const string& b, size_t m, size_t n) {
 
     gv_file = "call_graph_bad.gv";
@@ -64,10 +89,12 @@ string lcs_bad(const string& a, const string& b, size_t m, size_t n) {
 
             callid++;
             gv_edge(callid - 1, callid);
+
             string sa = lcs_bad(a, b, m - 1, n);
             
             callid++;
             gv_edge(ci, callid);
+
             string sb = lcs_bad(a, b, m, n - 1);
 
             return sa.length() >= sb.length() ? sa : sb;
@@ -75,6 +102,7 @@ string lcs_bad(const string& a, const string& b, size_t m, size_t n) {
     }
 }
 
+// LCS bonzão, com memo
 string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** memo) {
 
     gv_file = "call_graph_memo.gv";
@@ -83,7 +111,6 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** 
     // Se já existe no memo, nem faz sentido calcular
     if (memo[m][n]) {
         gv_node(callid, "color=green");
-
         return *memo[m][n];
     }
     
@@ -108,10 +135,12 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** 
 
             callid++;
             gv_edge(ci, callid);
+
             string sa = lcs_memo(a, b, m - 1, n, memo);
             
             callid++;
             gv_edge(ci, callid);
+
             string sb = lcs_memo(a, b, m, n - 1, memo);
 
             result = sa.length() >= sb.length() ? sa : sb;
@@ -124,6 +153,8 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** 
     return result;
 }
 
+// LCS bonzão com memo, mas sem ele na assinatura. Serve pra chamar sem ter
+// que se preocupar em alocar a matriz de memo e tal...
 string lcs_memo(const string& a, const string& b, size_t m, size_t n) {
 
     // Matriz de memo
