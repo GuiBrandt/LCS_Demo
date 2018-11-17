@@ -16,7 +16,6 @@ int main(int argc, char** argv) {
     call_graph.open("call_graph_memo.gv");
     call_graph << "strict digraph {" << endl;
     call_graph << "node [shape=rect style=filled];" << endl;
-    call_graph << "n0 [label=\"LCS(" << a << ", " << b << ")\"];" << endl;
     call_graph.close();
 
     cout << lcs_memo(a, b, a.size(), b.size()) << endl;
@@ -30,7 +29,6 @@ int main(int argc, char** argv) {
     call_graph.open("call_graph_bad.gv");
     call_graph << "strict digraph {" << endl;
     call_graph << "node [shape=rect style=filled];" << endl;
-    call_graph << "n0 [label=\"LCS(" << a << ", " << b << ")\"];" << endl;
     call_graph.close();
 
     cout << lcs_bad(a, b, a.size(), b.size()) << endl;
