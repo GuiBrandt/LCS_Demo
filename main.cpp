@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
 
     cout << "Calculating LCS using memoization...";
 
-    call_graph.open("call_graph_memo.gv");
+    ofstream call_graph("call_graph_memo.gv");
     call_graph << "strict digraph {" << endl;
     call_graph << "node [shape=rect style=filled];" << endl;
     call_graph.close();

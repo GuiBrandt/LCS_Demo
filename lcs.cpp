@@ -1,11 +1,31 @@
 #include "lcs.hpp"
-#include <iostream>
 
 //! Id de chamada da função, usado para plotagem dos gráficos no GraphView
 int callid = 0;
 
 //! Nome do arquivo do GraphView
 string gv_file;
+
+size_t memo_r, memo_c;
+
+/**
+ * @brief Escreve um log do memo no arquivo de log
+ * 
+ * @param memo Matriz de memorização
+ */
+void log_memo(string*** memo) {
+    ofstream memo_file("memo_log", ios::app);
+    for (int i = 0; i < memo_r; i++) {
+        for (int j = 0; j < memo_c; j++) {
+            if (memo[i][j])
+                memo_file << *memo[i][j];
+            memo_file << ";";
+        }
+        memo_file << endl;
+    }
+    memo_file << endl;
+    memo_file.close();
+}
 
 /**
  * @brief Define propriedades de um nó por número no gráfico
@@ -14,7 +34,7 @@ string gv_file;
  * @param attr Atributos do nó
  */
 void gv_node(int number, const string& attr = "") {
-    call_graph.open(gv_file, ios::app);
+    ofstream call_graph(gv_file, ios::app);
 
     call_graph << "node" << number;
     if (!attr.empty()) 
@@ -51,7 +71,7 @@ void gv_label(int number, const string& a, const string& b, size_t m, size_t n) 
  * @param to Nó de entrada
  */
 void gv_edge(int from, int to) {
-    call_graph.open(gv_file, ios::app);
+    ofstream call_graph(gv_file, ios::app);
     call_graph  << "node" << from 
                 << " -> "
                 << "node" << to
@@ -150,6 +170,8 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** 
         gv_node(callid, "color=white");
 
     memo[m][n] = new string(result);
+    log_memo(memo);
+
     return result;
 }
 
@@ -157,11 +179,19 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** 
 // que se preocupar em alocar a matriz de memo e tal...
 string lcs_memo(const string& a, const string& b, size_t m, size_t n) {
 
+    ofstream memo_file("memo_log");
+    memo_file   << a << endl
+                << b << endl;
+    memo_file.close();
+
     // Matriz de memo
     string*** memo = (string***)calloc(m + 1, sizeof(string**));
     for (int i = 0; i <= m; i++)
         memo[i] = (string**)calloc(n + 1, sizeof(string*));
     
+    memo_r = m + 1;
+    memo_c = n + 1;
+
     // Calcula o LCS
     string lcs = lcs_memo(a, b, m, n, memo);
 

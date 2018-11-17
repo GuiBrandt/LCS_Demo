@@ -2,3 +2,4 @@
 call_graph_*.gv
 *.exe
 *.png
+memo_log

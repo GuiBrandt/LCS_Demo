@@ -9,8 +9,6 @@ using namespace std;
 
 #include <fstream>
 
-static ofstream call_graph;
-
 /**
  * @brief Obtém a maior subsequência comum entre duas strings
  * 
