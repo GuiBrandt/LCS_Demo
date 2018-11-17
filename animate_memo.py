@@ -1,4 +1,6 @@
 import io
+from math import sqrt
+
 import matplotlib.pyplot as plt
 
 def __read_state(file):
@@ -25,13 +27,17 @@ def __create_table(a, b, memo):
         loc='center',
         cellLoc='center'
     )
+    table.auto_set_font_size(False)
+
     cells = table.get_celld()
 
     table_cells=table.get_children()
     for cell in table_cells:
         cell.set_width(1.0 / (len(b) + 1))
         cell.set_height(1.0 / (len(a) + 1))
-        cell.set_fontsize(14)
+
+        cell.set_fontsize(16.0)
+        cell.auto_set_font_size(cell.figure.canvas.get_renderer())
 
     for c, cell in cells.items():
         if c[0] > 0 and c[1] >= 0:
@@ -99,7 +105,11 @@ if __name__ == "__main__":
                 continue
 
             cell = cells[i + 1, j]
+
             cell.get_text().set_text(memo[i][j])
+            
+            cell.set_fontsize(16.0)
+            cell.auto_set_font_size(cell.figure.canvas.get_renderer())
 
             if cell == current_cell:
                 cell.set_fc("red")
