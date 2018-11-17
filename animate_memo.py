@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
         line = line.strip("\r\n")
         while line != "":
-            cell_text.append(line.split(";")[:-2])
+            cell_text.append(line.split(";")[:-1])
             line = file.readline().strip("\r\n")
 
         if table is None:
