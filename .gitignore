@@ -1,0 +1,4 @@
+.vscode/*
+call_graph_*.gv
+*.exe
+*.png
