@@ -22,7 +22,7 @@ Legenda: Cinza = as sequências terminam com o mesmo caractere, Vermelho = as se
 
 ## Tabela de memorização
 
-![Tabela de memorização](https://imgur.com/weIpbvW.png)
+![Tabela de memorização](https://imgur.com/061jFy0.png)
 
 Cada linha representa um caractere da sequência `asdasdasd` e cada coluna representa um caractere da sequência `bsdbsdbsd`. Considere que as legendas das linhas e colunas são cumulativas. O valor da célula (i, j) é o LCS da substring de `asdasdasd` de 0 até i e da substring de `bsdbsdbsd` de 0 até j.
 
