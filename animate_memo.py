@@ -65,12 +65,11 @@ if __name__ == "__main__":
     plt.axis('off')
     plt.rcParams["font.family"] = "serif"
 
-    plt.waitforbuttonpress()
-    plt.waitforbuttonpress()
-
     # Variáveis de controle
     table = None
     caption = None
+
+    memo = None
 
     step = 0
 

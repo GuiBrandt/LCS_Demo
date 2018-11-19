@@ -13,12 +13,13 @@ size_t memo_r, memo_c;
  * 
  * @param memo Matriz de memorização
  */
-void log_memo(string** memo, size_t m, size_t n) {
+void log_memo(string*** memo, size_t m, size_t n) {
     ofstream memo_file("memo_log", ios::app);
     memo_file << m << " " << n << endl;
     for (int i = 0; i < memo_r; i++) {
         for (int j = 0; j < memo_c; j++) {
-            memo_file << memo[i][j];
+            if (memo[i][j])
+                memo_file << *memo[i][j];
             memo_file << ";";
         }
         memo_file << endl;
@@ -123,21 +124,25 @@ string lcs_bad(const string& a, const string& b, size_t m, size_t n) {
 }
 
 // LCS bonzão, com memo
-string lcs_memo(const string& a, const string& b, size_t m, size_t n, string** memo) {
+string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** memo) {
 
     gv_file = "call_graph_memo.gv";
     gv_label(callid, a, b, m, n);
 
     // Se já existe no memo, nem faz sentido calcular
-    if (memo[m][n] != "") {
+    if (memo[m][n]) {
         gv_node(callid, "color=green");
-        return memo[m][n];
+        return *memo[m][n];
     }
     
     string result = "";
     
     // Se o tamanho é zero, a resposta é vazia
-    if (m != 0 && n != 0) {
+    if (m == 0 || n == 0) {
+        gv_node(callid, "color=white");
+        return "";
+
+    } else {
 
         // Se o último caractere das duas strings é igual, tira ele e põe no LCS
         if (a[m - 1] == b[n - 1]) {
@@ -166,10 +171,9 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n, string** m
             result = sa.length() >= sb.length() ? sa : sb;
         }
 
-    } else
-        gv_node(callid, "color=white");
+    }
 
-    memo[m][n] = result;
+    memo[m][n] = new string(result);
     log_memo(memo, m, n);
 
     return result;
@@ -185,9 +189,9 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n) {
     memo_file.close();
 
     // Matriz de memo
-    string** memo = new string*[m + 1];
+    string*** memo = new string**[m + 1];
     for (int i = 0; i <= m; i++)
-        memo[i] = new string[n + 1];
+        memo[i] = (string**)calloc(n + 1, sizeof(string*));
     
     memo_r = m + 1;
     memo_c = n + 1;
@@ -198,7 +202,7 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n) {
     // Libera a matriz de memo
     for (int i = 0; i <= m; i++)
         delete [] memo[i];
-        
+
     delete [] memo;
 
     return lcs;
