@@ -13,13 +13,12 @@ size_t memo_r, memo_c;
  * 
  * @param memo Matriz de memorização
  */
-void log_memo(string*** memo, size_t m, size_t n) {
+void log_memo(string** memo, size_t m, size_t n) {
     ofstream memo_file("memo_log", ios::app);
     memo_file << m << " " << n << endl;
     for (int i = 0; i < memo_r; i++) {
         for (int j = 0; j < memo_c; j++) {
-            if (memo[i][j])
-                memo_file << *memo[i][j];
+            memo_file << memo[i][j];
             memo_file << ";";
         }
         memo_file << endl;
@@ -124,15 +123,15 @@ string lcs_bad(const string& a, const string& b, size_t m, size_t n) {
 }
 
 // LCS bonzão, com memo
-string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** memo) {
+string lcs_memo(const string& a, const string& b, size_t m, size_t n, string** memo) {
 
     gv_file = "call_graph_memo.gv";
     gv_label(callid, a, b, m, n);
 
     // Se já existe no memo, nem faz sentido calcular
-    if (memo[m][n]) {
+    if (memo[m][n] != "") {
         gv_node(callid, "color=green");
-        return *memo[m][n];
+        return memo[m][n];
     }
     
     string result = "";
@@ -170,7 +169,7 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** 
     } else
         gv_node(callid, "color=white");
 
-    memo[m][n] = new string(result);
+    memo[m][n] = result;
     log_memo(memo, m, n);
 
     return result;
@@ -186,9 +185,9 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n) {
     memo_file.close();
 
     // Matriz de memo
-    string*** memo = (string***)calloc(m + 1, sizeof(string**));
+    string** memo = new string*[m + 1];
     for (int i = 0; i <= m; i++)
-        memo[i] = (string**)calloc(n + 1, sizeof(string*));
+        memo[i] = new string[n + 1];
     
     memo_r = m + 1;
     memo_c = n + 1;
@@ -197,14 +196,10 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n) {
     string lcs = lcs_memo(a, b, m, n, memo);
 
     // Libera a matriz de memo
-    for (int i = 0; i <= m; i++) {
-        for (int j = 0; j <= n; j++)
-            if (memo[i][j])
-                free(memo[i][j]);
-
-        free(memo[i]);
-    }
-    free(memo);
+    for (int i = 0; i <= m; i++)
+        delete [] memo[i];
+        
+    delete [] memo;
 
     return lcs;
 }
