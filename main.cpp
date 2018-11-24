@@ -1,13 +1,22 @@
 #include "lcs.hpp"
 
 #include <iostream>
+#include <chrono>
 
 #ifdef _WIN32
 #include <windows.h>
+#else
+#include <locale.h>
 #endif
 
 int main(int argc, char** argv) {
     string a, b;
+
+    #ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    #else
+    setlocale(LC_ALL, "pt_BR.UTF-8");
+    #endif
 
     cout << "String A: ";
     cin >> a;
@@ -61,27 +70,34 @@ int main(int argc, char** argv) {
     cout << endl;
     cout << endl;
 
-    cout << "Calculating LCS using memoization...";
+    cout << "Calculando LCS usando memorização... ";
 
     ofstream call_graph("call_graph_memo.gv");
     call_graph << "strict digraph {" << endl;
     call_graph << "node [shape=rect style=filled];" << endl;
     call_graph.close();
 
+    auto start = chrono::steady_clock::now();
     cout << lcs_memo(a, b) << endl;
+    auto end = chrono::steady_clock::now();
+
+    cout << "Tempo usado: " << chrono::duration <double, milli>(end - start).count() << "ms" << endl;
 
     call_graph.open("call_graph_memo.gv", ios::app);
     call_graph << "}";
     call_graph.close();
 
-    cout << "Calculating LCS without memoization...";
+    cout << "Calculando LCS sem memorização... ";
     
     call_graph.open("call_graph_bad.gv");
     call_graph << "strict digraph {" << endl;
     call_graph << "node [shape=rect style=filled];" << endl;
     call_graph.close();
 
+    start = chrono::steady_clock::now();
     cout << lcs_bad(a, b, a.size(), b.size()) << endl;
+    end = chrono::steady_clock::now();
+    cout << "Tempo usado: " << chrono::duration <double, milli>(end - start).count() << "ms" << endl;
 
     call_graph.open("call_graph_bad.gv", ios::app);
     call_graph << "}";
