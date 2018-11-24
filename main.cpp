@@ -97,6 +97,7 @@ int main(int argc, char** argv) {
     start = chrono::steady_clock::now();
     cout << lcs_bad(a, b, a.size(), b.size()) << endl;
     end = chrono::steady_clock::now();
+    
     cout << "Tempo usado: " << chrono::duration <double, milli>(end - start).count() << "ms" << endl;
 
     call_graph.open("call_graph_bad.gv", ios::app);

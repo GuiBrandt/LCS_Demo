@@ -131,27 +131,26 @@ string lcs_bad(const string& a, const string& b, size_t m, size_t n) {
 string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** memo) {
 
     gv_file = "call_graph_memo.gv";
-    gv_label(callid, a, b, m, n);
-
-    // Se já existe no memo, nem faz sentido calcular
-    if (memo[m][n]) {
-        gv_node(callid, "color=green");
-        return *memo[m][n];
-    }
-    
-    string result = "";
+    //gv_label(callid, a, b, m, n);
     
     // Se o tamanho é zero, a resposta é vazia
     if (m == 0 || n == 0) {
-        gv_node(callid, "color=white");
+        //gv_node(callid, "color=white");
         return "";
 
     } else {
+        string result = "";
+
+        // Se já existe no memo, nem faz sentido calcular
+        if (memo[m - 1][n - 1]) {
+            //gv_node(callid, "color=green");
+            return *memo[m - 1][n - 1];
+        }
 
         // Se o último caractere das duas strings é igual, tira ele e põe no LCS
         if (a[m - 1] == b[n - 1]) {
             callid++;
-            gv_edge(callid - 1, callid);
+            //gv_edge(callid - 1, callid);
                         
             result = lcs_memo(a, b, m - 1, n - 1, memo) + a[m - 1];
 
@@ -160,27 +159,26 @@ string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** 
         //      - ou da string B sem o último caractere e A
         } else {
             int ci = callid;
-            gv_node(ci, "color=red");
+            //gv_node(ci, "color=red");
 
             callid++;
-            gv_edge(ci, callid);
+            //gv_edge(ci, callid);
 
             string sa = lcs_memo(a, b, m - 1, n, memo);
             
             callid++;
-            gv_edge(ci, callid);
+            //gv_edge(ci, callid);
 
             string sb = lcs_memo(a, b, m, n - 1, memo);
 
             result = sa.length() >= sb.length() ? sa : sb;
         }
 
+        memo[m - 1][n - 1] = new string(result);
+        //log_memo(memo, m, n);
+
+        return result;
     }
-
-    memo[m][n] = new string(result);
-    log_memo(memo, m, n);
-
-    return result;
 }
 
 // LCS bonzão com memo, mas sem ele na assinatura. Serve pra chamar sem ter
@@ -191,21 +189,21 @@ string lcs_memo(const string& a, const string& b) {
                 << b << endl;
     memo_file.close();
 
-    int m = a.length() - 1, n = b.length() - 1;
+    int m = a.length(), n = b.length();
 
     // Matriz de memo
-    string*** memo = new string**[m + 1];
-    for (int i = 0; i <= m; i++)
-        memo[i] = (string**)calloc(n + 1, sizeof(string*));
+    string*** memo = new string**[m];
+    for (int i = 0; i < m; i++)
+        memo[i] = (string**)calloc(n, sizeof(string*));
     
-    memo_r = m + 1;
-    memo_c = n + 1;
+    memo_r = m;
+    memo_c = n;
 
     // Calcula o LCS
     string lcs = lcs_memo(a, b, m, n, memo);
 
     // Libera a matriz de memo
-    for (int i = 0; i <= m; i++)
+    for (int i = 0; i < m; i++)
         delete [] memo[i];
     delete [] memo;
 
@@ -272,12 +270,12 @@ diff_node* diff(const string& a, const string& b) {
 
     int m = a.length(), n = b.length();
 
-    string*** memo = new string**[m + 1];
-    for (int i = 0; i <= m; i++)
-        memo[i] = (string**)calloc(n + 1, sizeof(string*));
+    string*** memo = new string**[m];
+    for (int i = 0; i < m; i++)
+        memo[i] = (string**)calloc(n, sizeof(string*));
     
-    memo_r = m + 1;
-    memo_c = n + 1;
+    memo_r = m;
+    memo_c = n;
 
     // Calcula o LCS
     string lcs = lcs_memo(a, b, m, n, memo);
@@ -286,7 +284,7 @@ diff_node* diff(const string& a, const string& b) {
     diff_node* result = diff(a, b, m, n, memo);
 
     // Libera a matriz de memo
-    for (int i = 0; i <= m; i++)
+    for (int i = 0; i < m; i++)
         delete [] memo[i];
     delete [] memo;
 

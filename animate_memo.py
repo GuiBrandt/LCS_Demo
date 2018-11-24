@@ -16,7 +16,7 @@ def __read_state(file):
         memo.append(line.split(";")[:-1])
         line = file.readline().strip("\r\n")
 
-    return m, n, memo
+    return m - 1, n - 1, memo
 
 def __create_table(a, b, memo):
     table = plt.table(
@@ -56,8 +56,8 @@ def __compute_accesses(a, b, m, n, accesses):
 if __name__ == "__main__":
     
     file = open("memo_log", 'r')
-    a = " " + file.readline().strip("\r\n")
-    b = " " + file.readline().strip("\r\n")
+    a = file.readline().strip("\r\n")
+    b = file.readline().strip("\r\n")
 
     # Configuração do PyPlot
     plt.ion()
