@@ -1,5 +1,4 @@
 import io
-from math import sqrt
 
 import matplotlib.pyplot as plt
 

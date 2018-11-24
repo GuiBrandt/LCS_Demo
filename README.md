@@ -14,7 +14,7 @@ O arquivo `memo_log` é usado pelo script Python `animate_memo.py`, que usa `Mat
 
 ![LCS sem memorização](https://i.imgur.com/vV19Byv.png)
 
-Mesma árvore, mas para um LCS com memorização (92 chamadas a `LCS`):
+Mesma árvore, mas para um LCS com memorização (93 chamadas a `LCS`):
 
 ![LCS com memorização](https://i.imgur.com/HNMU15t.png)
 
