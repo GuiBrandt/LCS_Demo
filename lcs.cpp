@@ -1,5 +1,7 @@
 #include "lcs.hpp"
 
+#include <iostream>
+
 //! Id de chamada da função, usado para plotagem dos gráficos no GraphView
 int callid = 0;
 
@@ -220,29 +222,35 @@ string lcs_memo(const string& a, const string& b) {
  * @param memo Matriz de memorização gerada pela função lcs_memo
  * @return diff_node* Lista ligada de diferenças entre as strings
  */
-diff_node* diff(const string& a, const string& b, size_t m, size_t n, string*** memo) {
+diff_node* diff(const string& a, const string& b, int m, int n, string*** memo) {
     diff_node *result, *last;
 
-    if (m > 0 && n > 0 && a[m - 1] == b[n - 1]) {
+    if (m >= 0 && n >= 0 && a[m] == b[n]) {
         last = diff(a, b, m - 1, n - 1, memo);
 
         result = new diff_node();
         result->operation = ' ';
-        result->value = a[m - 1];
+        result->value = a[m];
         
-    } else if (n > 0 && (m == 0 || !memo[m - 1][n] || (memo[m][n - 1] ? memo[m][n - 1]->length() : 0) >= memo[m - 1][n]->length())) {
+    } else if (
+        (n == 0 && (m <= 0 || !memo[m - 1][n])) ||
+        (n > 0 && (m <= 0 || !memo[m - 1][n] || (memo[m][n - 1] ? memo[m][n - 1]->length() : 0) >= memo[m - 1][n]->length()))
+    ) {
         last = diff(a, b, m, n - 1, memo);
 
         result = new diff_node();
         result->operation = '+';
-        result->value = b[n - 1];
+        result->value = b[n];
 
-    } else if (m > 0 && (n == 0 || !memo[m][n - 1] || (memo[m - 1][n] ? memo[m - 1][n]->length() : 0) >= memo[m][n - 1]->length())) {
+    } else if (
+        (m == 0 && (n <= 0 || !memo[m][n - 1])) ||
+        (m > 0 && (n <= 0 || !memo[m][n - 1] || (memo[m - 1][n] ? memo[m - 1][n]->length() : 0) >= memo[m][n - 1]->length()))
+    ) {
         last = diff(a, b, m - 1, n, memo);
 
         result = new diff_node();
         result->operation = '-';
-        result->value = a[m - 1];
+        result->value = a[m];
 
     } else
         return nullptr;
@@ -263,25 +271,16 @@ diff_node* diff(const string& a, const string& b, size_t m, size_t n, string*** 
 }
 
 diff_node* diff(const string& a, const string& b) {
-    ofstream memo_file("memo_log");
-    memo_file   << a << endl
-                << b << endl;
-    memo_file.close();
-
     int m = a.length(), n = b.length();
 
     string*** memo = new string**[m];
     for (int i = 0; i < m; i++)
         memo[i] = (string**)calloc(n, sizeof(string*));
-    
-    memo_r = m;
-    memo_c = n;
 
     // Calcula o LCS
     string lcs = lcs_memo(a, b, m, n, memo);
 
-    // Calcula o diff
-    diff_node* result = diff(a, b, m, n, memo);
+    diff_node* result = diff(a, b, m - 1, n - 1, memo);
 
     // Libera a matriz de memo
     for (int i = 0; i < m; i++)
