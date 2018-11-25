@@ -37,7 +37,7 @@ string lcs_memo(const string&, const string&);
  */
 struct diff_node {
     char operation;
-    string value;
+    char value;
     diff_node* next;
 };
 

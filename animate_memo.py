@@ -64,6 +64,9 @@ if __name__ == "__main__":
     plt.axis('off')
     plt.rcParams["font.family"] = "serif"
 
+    plt.waitforbuttonpress()
+    plt.waitforbuttonpress()
+
     # Variáveis de controle
     table = None
     caption = None
@@ -146,7 +149,7 @@ if __name__ == "__main__":
             m -= 1
             n -= 1
 
-        elif memo[m - 1][n] > memo[m][n - 1]:
+        elif memo[m - 1][n] >= memo[m][n - 1]:
             m -= 1
 
         else:

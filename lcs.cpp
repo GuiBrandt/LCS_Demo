@@ -15,6 +15,36 @@ string gv_file;
 size_t memo_r, memo_c;
 
 /**
+ * @brief Aloca uma matriz de memo e inicializa com -1
+ * 
+ * @param m Altura da matriz
+ * @param n Largura da matriz
+ * @return int** Matriz de memo
+ */
+int** alloc_memo(size_t m, size_t n) {
+    int **memo = new int*[m + 1];
+
+    for (int i = 0; i <= m; i++) {
+        memo[i] = new int[n + 1];
+        fill_n(memo[i], n + 1, -1);
+    }
+
+    return memo;
+}
+
+/**
+ * @brief Libera uma matriz de memo
+ * 
+ * @param memo Matriz
+ * @param m Altura da matriz
+ */
+void free_memo(int** memo, size_t m) {
+    for (int i = 0; i <= m; i++)
+        delete [] memo[i];
+    delete [] memo;
+}
+
+/**
  * @brief Escreve um log do memo no arquivo de log
  * 
  * @param memo Matriz de memorização
@@ -186,15 +216,20 @@ int lcs_memo(const string& a, const string& b, size_t m, size_t n, int** memo) {
 
 // Backtracking do LCS a partir das strings e do memo
 string lcs_backtrack(const string& a, const string& b, size_t m, size_t n, int** memo) {
+    // Se alguma está vazia, o lcs é vazio
     if (m == 0 || n == 0)
         return "";
 
+    // Se o último caractere das duas é igual, o lcs é o lcs do que vem antes
+    // mais esse caractere no final
     if (a[m - 1] == b[n - 1])
         return lcs_backtrack(a, b, m - 1, n - 1, memo) + a[m - 1];
 
-    else if (memo[m][n - 1] > memo[m - 1][n])
+    // Se o LCS pra esquerda na matriz é maior ou igual, usa ele
+    else if (memo[m][n - 1] >= memo[m - 1][n])
         return lcs_backtrack(a, b, m, n - 1, memo);
 
+    // Se não, usa o LCS pra cima na matriz
     else
         return lcs_backtrack(a, b, m - 1, n, memo);
 }
@@ -208,25 +243,18 @@ string lcs_memo(const string& a, const string& b) {
     memo_file.close();
 
     int m = a.length(), n = b.length();
-
-    // Matriz de memo
-    int** memo = new int*[m + 1];
-    for (int i = 0; i <= m; i++) {
-        memo[i] = new int[n + 1];
-        fill_n(memo[i], n + 1, -1);
-    }
-    
     memo_r = m + 1;
     memo_c = n + 1;
+
+    // Matriz de memo
+    int** memo = alloc_memo(m, n);
 
     // Calcula o LCS
     lcs_memo(a, b, m, n, memo);
     string lcs = lcs_backtrack(a, b, m, n, memo);
 
     // Libera a matriz de memo
-    for (int i = 0; i <= m; i++)
-        delete [] memo[i];
-    delete [] memo;
+    free_memo(memo, m);
 
     return lcs;
 }
@@ -235,6 +263,7 @@ string lcs_memo(const string& a, const string& b) {
 diff_node* diff(const string& a, const string& b, int m, int n, int** memo) {
     diff_node *result, *last;
 
+    // Se os caracteres são iguais, está no LCS e pontanto não tem diferença
     if (m > 0 && n > 0 && a[m - 1] == b[n - 1]) {
         last = diff(a, b, m - 1, n - 1, memo);
 
@@ -242,6 +271,8 @@ diff_node* diff(const string& a, const string& b, int m, int n, int** memo) {
         result->operation = ' ';
         result->value = a[m - 1];
         
+    // Se esse é um caractere que está na string B e não na string A, ele foi
+    // adicionado
     } else if (n > 0 && (m == 0 || memo[m][n - 1] >= memo[m - 1][n])) {
         last = diff(a, b, m, n - 1, memo);
 
@@ -249,6 +280,8 @@ diff_node* diff(const string& a, const string& b, int m, int n, int** memo) {
         result->operation = '+';
         result->value = b[n - 1];
 
+    // Se esse é um caractere que está na string A e não na string B, ele foi
+    // removido
     } else if (m > 0 && (n == 0 || memo[m - 1][n] > memo[m][n - 1])) {
         last = diff(a, b, m - 1, n, memo);
         
@@ -261,6 +294,8 @@ diff_node* diff(const string& a, const string& b, int m, int n, int** memo) {
 
     result->next = nullptr;
     
+    // Se tinha algum nó antes, adiciona o atual ao fim da lista (as chamadas 
+    // acontecem de trás pra frente)
     if (last) {
         diff_node* node = last;
         while (node->next)
@@ -270,39 +305,26 @@ diff_node* diff(const string& a, const string& b, int m, int n, int** memo) {
         
         return last;
 
+    // Se não retorna esse nó mesmo
     } else
         return result;
 }
 
 // Diff
 diff_node* diff(const string& a, const string& b) {
-    ofstream memo_file("memo_log");
-    memo_file   << a << endl
-                << b << endl;
-    memo_file.close();
-
     size_t m = a.length(), n = b.length();
 
-    int **memo = new int*[m + 1];
-
-    for (int i = 0; i <= m; i++) {
-        memo[i] = new int[n + 1];
-        fill_n(memo[i], n + 1, -1);
-    }
-
-    memo_r = m + 1;
-    memo_c = n + 1;
+    // Matriz de memo
+    int** memo = alloc_memo(m, n);
 
     // Calcula o LCS
     lcs_memo(a, b, m, n, memo);
-    log_memo(memo, m, n);
 
+    // Calcula a lista diff das strings
     diff_node* result = diff(a, b, m, n, memo);
 
     // Libera a matriz de memo
-    for (int i = 0; i <= m; i++)
-        delete [] memo[i];
-    delete [] memo;
+    free_memo(memo, m);
 
     return result;
 }
