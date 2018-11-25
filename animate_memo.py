@@ -126,16 +126,43 @@ if __name__ == "__main__":
         caption.set_text('Step: %d      m: %d       n: %d' % (step, m, n))
         
         plt.draw()
-        plt.pause(0.01)
+        plt.pause(0.001)
 
         current_cell.set_fc(original_face_color)
         current_cell.get_text().set_color(original_text_color)
+
+    lcs = ""
+
+    m = len(a) - 1
+    n = len(b) - 1
+
+    while m >= 0 and n >= 0:
+        cell = cells[m + 1, n]
+        cell.set_fc("red")
+        cell.get_text().set_color("white")
+
+        if a[m] == b[n]:
+            lcs = a[m] + lcs
+            m -= 1
+            n -= 1
+
+        elif memo[m - 1][n] > memo[m][n - 1]:
+            m -= 1
+
+        else:
+            n -= 1
+
+        cell.get_text().set_text(lcs)
+        cell.auto_set_font_size(cell.figure.canvas.get_renderer())
+
+        plt.draw()
+        plt.pause(0.1)
 
     plt.ioff()
     caption = plt.text(
         0, -0.1, 
         "Finished: LCS is \"%s\", %d memo accesses" % (
-            memo[len(a) - 1][len(b) - 1],
+            lcs,
             sum([item for sub in accesses for item in sub])), 
             fontsize=14
         )

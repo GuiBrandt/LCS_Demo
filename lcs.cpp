@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include <algorithm>
+using namespace std;
+
 //! Id de chamada da função, usado para plotagem dos gráficos no GraphView
 int callid = 0;
 
@@ -16,14 +19,14 @@ size_t memo_r, memo_c;
  * 
  * @param memo Matriz de memorização
  */
-void log_memo(string*** memo, size_t m, size_t n) {
+void log_memo(int** memo, size_t m, size_t n) {
     ofstream memo_file("memo_log", ios::app);
     memo_file << m << " " << n << endl;
 
-    for (int i = 0; i < memo_r; i++) {
-        for (int j = 0; j < memo_c; j++) {
-            if (memo[i][j])
-                memo_file << *memo[i][j];
+    for (int i = 1; i < memo_r; i++) {
+        for (int j = 1; j < memo_c; j++) {
+            if (memo[i][j] >= 0)
+                memo_file << memo[i][j];
 
             memo_file << ";";
         }
@@ -130,57 +133,70 @@ string lcs_bad(const string& a, const string& b, size_t m, size_t n) {
 }
 
 // LCS bonzão, com memo
-string lcs_memo(const string& a, const string& b, size_t m, size_t n, string*** memo) {
+int lcs_memo(const string& a, const string& b, size_t m, size_t n, int** memo) {
 
     gv_file = "call_graph_memo.gv";
-    //gv_label(callid, a, b, m, n);
+    gv_label(callid, a, b, m, n);
     
+    int result = 0;
+
     // Se o tamanho é zero, a resposta é vazia
     if (m == 0 || n == 0) {
-        //gv_node(callid, "color=white");
-        return "";
+        gv_node(callid, "color=white");
+        return 0;
 
     } else {
-        string result = "";
-
         // Se já existe no memo, nem faz sentido calcular
-        if (memo[m - 1][n - 1]) {
-            //gv_node(callid, "color=green");
-            return *memo[m - 1][n - 1];
+        if (memo[m][n] != -1) {
+            gv_node(callid, "color=green");
+            return memo[m][n];
         }
 
         // Se o último caractere das duas strings é igual, tira ele e põe no LCS
         if (a[m - 1] == b[n - 1]) {
             callid++;
-            //gv_edge(callid - 1, callid);
+            gv_edge(callid - 1, callid);
                         
-            result = lcs_memo(a, b, m - 1, n - 1, memo) + a[m - 1];
+            result = lcs_memo(a, b, m - 1, n - 1, memo) + 1;
 
         // Se não, pega o maior LCS: 
         //      - da string A sem o último caractere e B
         //      - ou da string B sem o último caractere e A
         } else {
             int ci = callid;
-            //gv_node(ci, "color=red");
+            gv_node(ci, "color=red");
 
             callid++;
-            //gv_edge(ci, callid);
+            gv_edge(ci, callid);
+            int lcs_a = lcs_memo(a, b, m - 1, n, memo);
 
-            string sa = lcs_memo(a, b, m - 1, n, memo);
-            
             callid++;
-            //gv_edge(ci, callid);
+            gv_edge(ci, callid);
+            int lcs_b = lcs_memo(a, b, m, n - 1, memo);
 
-            string sb = lcs_memo(a, b, m, n - 1, memo);
-
-            result = sa.length() >= sb.length() ? sa : sb;
+            result = max(lcs_a, lcs_b);
         }
-
-        memo[m - 1][n - 1] = new string(result);
-        //log_memo(memo, m, n);
-
-        return result;
     }
+    
+    memo[m][n] = result;
+    log_memo(memo, m, n);
+
+    return result;
+}
+
+// Backtracking do LCS a partir das strings e do memo
+string lcs_backtrack(const string& a, const string& b, size_t m, size_t n, int** memo) {
+    if (m == 0 || n == 0)
+        return "";
+
+    if (a[m - 1] == b[n - 1])
+        return lcs_backtrack(a, b, m - 1, n - 1, memo) + a[m - 1];
+
+    else if (memo[m][n - 1] > memo[m - 1][n])
+        return lcs_backtrack(a, b, m, n - 1, memo);
+
+    else
+        return lcs_backtrack(a, b, m - 1, n, memo);
 }
 
 // LCS bonzão com memo, mas sem ele na assinatura. Serve pra chamar sem ter
@@ -194,63 +210,51 @@ string lcs_memo(const string& a, const string& b) {
     int m = a.length(), n = b.length();
 
     // Matriz de memo
-    string*** memo = new string**[m];
-    for (int i = 0; i < m; i++)
-        memo[i] = (string**)calloc(n, sizeof(string*));
+    int** memo = new int*[m + 1];
+    for (int i = 0; i <= m; i++) {
+        memo[i] = new int[n + 1];
+        fill_n(memo[i], n + 1, -1);
+    }
     
-    memo_r = m;
-    memo_c = n;
+    memo_r = m + 1;
+    memo_c = n + 1;
 
     // Calcula o LCS
-    string lcs = lcs_memo(a, b, m, n, memo);
+    lcs_memo(a, b, m, n, memo);
+    string lcs = lcs_backtrack(a, b, m, n, memo);
 
     // Libera a matriz de memo
-    for (int i = 0; i < m; i++)
+    for (int i = 0; i <= m; i++)
         delete [] memo[i];
     delete [] memo;
 
     return lcs;
 }
 
-/**
- * @brief Gera uma lista de diferenças entre duas strings
- * 
- * @param a String A
- * @param b String B
- * @param m Tamanho da string A - 1
- * @param n Tamanho da string B - 1
- * @param memo Matriz de memorização gerada pela função lcs_memo
- * @return diff_node* Lista ligada de diferenças entre as strings
- */
-diff_node* diff(const string& a, const string& b, int m, int n, string*** memo) {
+// Diff recursivo com backtracking
+diff_node* diff(const string& a, const string& b, int m, int n, int** memo) {
     diff_node *result, *last;
 
-    if (m >= 0 && n >= 0 && a[m] == b[n]) {
+    if (m > 0 && n > 0 && a[m - 1] == b[n - 1]) {
         last = diff(a, b, m - 1, n - 1, memo);
 
         result = new diff_node();
         result->operation = ' ';
-        result->value = a[m];
+        result->value = a[m - 1];
         
-    } else if (
-        (n == 0 && (m <= 0 || !memo[m - 1][n])) ||
-        (n > 0 && (m <= 0 || !memo[m - 1][n] || (memo[m][n - 1] ? memo[m][n - 1]->length() : 0) >= memo[m - 1][n]->length()))
-    ) {
+    } else if (n > 0 && (m == 0 || memo[m][n - 1] >= memo[m - 1][n])) {
         last = diff(a, b, m, n - 1, memo);
 
         result = new diff_node();
         result->operation = '+';
-        result->value = b[n];
+        result->value = b[n - 1];
 
-    } else if (
-        (m == 0 && (n <= 0 || !memo[m][n - 1])) ||
-        (m > 0 && (n <= 0 || !memo[m][n - 1] || (memo[m - 1][n] ? memo[m - 1][n]->length() : 0) >= memo[m][n - 1]->length()))
-    ) {
+    } else if (m > 0 && (n == 0 || memo[m - 1][n] > memo[m][n - 1])) {
         last = diff(a, b, m - 1, n, memo);
-
+        
         result = new diff_node();
         result->operation = '-';
-        result->value = a[m];
+        result->value = a[m - 1];
 
     } else
         return nullptr;
@@ -270,20 +274,33 @@ diff_node* diff(const string& a, const string& b, int m, int n, string*** memo) 
         return result;
 }
 
+// Diff
 diff_node* diff(const string& a, const string& b) {
-    int m = a.length(), n = b.length();
+    ofstream memo_file("memo_log");
+    memo_file   << a << endl
+                << b << endl;
+    memo_file.close();
 
-    string*** memo = new string**[m];
-    for (int i = 0; i < m; i++)
-        memo[i] = (string**)calloc(n, sizeof(string*));
+    size_t m = a.length(), n = b.length();
+
+    int **memo = new int*[m + 1];
+
+    for (int i = 0; i <= m; i++) {
+        memo[i] = new int[n + 1];
+        fill_n(memo[i], n + 1, -1);
+    }
+
+    memo_r = m + 1;
+    memo_c = n + 1;
 
     // Calcula o LCS
-    string lcs = lcs_memo(a, b, m, n, memo);
+    lcs_memo(a, b, m, n, memo);
+    log_memo(memo, m, n);
 
-    diff_node* result = diff(a, b, m - 1, n - 1, memo);
+    diff_node* result = diff(a, b, m, n, memo);
 
     // Libera a matriz de memo
-    for (int i = 0; i < m; i++)
+    for (int i = 0; i <= m; i++)
         delete [] memo[i];
     delete [] memo;
 

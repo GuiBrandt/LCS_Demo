@@ -42,9 +42,11 @@ struct diff_node {
 };
 
 /**
- * @brief Obtém as diferenças entre duas strings
+ * @brief Gera uma lista de diferenças entre duas strings
  * 
- * @return string Diferenças entre as strings
+ * @param a String A
+ * @param b String B
+ * @return diff_node* Lista ligada de diferenças entre as strings
  */
 diff_node* diff(const string&, const string&);
 
