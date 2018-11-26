@@ -19,10 +19,10 @@ int main(int argc, char** argv) {
     #endif
 
     cout << "String A: ";
-    cin >> a;
+    getline(cin, a);
 
     cout << "String B: ";
-    cin >> b;
+    getline(cin, b);
 
     cout << "Diff: ";
 
@@ -70,39 +70,17 @@ int main(int argc, char** argv) {
     cout << endl;
     cout << endl;
 
-    cout << "Calculando LCS usando memorização... ";
-
-    ofstream call_graph("call_graph_memo.gv");
-    call_graph << "strict digraph {" << endl;
-    call_graph << "node [shape=rect style=filled];" << endl;
-    call_graph.close();
-
-    auto start = chrono::steady_clock::now();
+    cout << "Calculando LCS usando memorizacao... ";
+    auto start = chrono::high_resolution_clock::now();
     cout << lcs_memo(a, b) << endl;
-    auto end = chrono::steady_clock::now();
-
+    auto end = chrono::high_resolution_clock::now();
     cout << "Tempo usado: " << chrono::duration <double, milli>(end - start).count() << "ms" << endl;
 
-    call_graph.open("call_graph_memo.gv", ios::app);
-    call_graph << "}";
-    call_graph.close();
-
-    cout << "Calculando LCS sem memorização... ";
-    
-    call_graph.open("call_graph_bad.gv");
-    call_graph << "strict digraph {" << endl;
-    call_graph << "node [shape=rect style=filled];" << endl;
-    call_graph.close();
-
-    start = chrono::steady_clock::now();
+    cout << "Calculando LCS sem memorizacao... ";
+    start = chrono::high_resolution_clock::now();
     cout << lcs_bad(a, b, a.size(), b.size()) << endl;
-    end = chrono::steady_clock::now();
-    
+    end = chrono::high_resolution_clock::now();
     cout << "Tempo usado: " << chrono::duration <double, milli>(end - start).count() << "ms" << endl;
-
-    call_graph.open("call_graph_bad.gv", ios::app);
-    call_graph << "}";
-    call_graph.close();
 
     return 0;
 }
