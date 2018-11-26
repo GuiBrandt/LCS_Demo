@@ -20,10 +20,12 @@ Mesma árvore, mas para um LCS com memorização (93 chamadas a `LCS`):
 
 Legenda: Cinza = as sequências terminam com o mesmo caractere, Vermelho = as sequências não terminam com o mesmo caractere, Verde = salvo no memo, Branco = uma ou mais sequências vazias
 
-## Tabela de memorização
+## Tabela de memorização e backtracking
 
-![Tabela de memorização](https://i.imgur.com/ESngM7P.gif)
+![Tabela de memorização e backtracking](https://i.imgur.com/bv3va2b.gif)
 
 Cada linha representa um caractere da sequência `asdasdasd` e cada coluna representa um caractere da sequência `bsdbsdbsd`. Considere que as legendas das linhas e colunas são cumulativas. O valor da célula (i, j) é o LCS da substring de `asdasdasd` de 0 até i e da substring de `bsdbsdbsd` de 0 até j.
 
 As cores na matriz representam a frequência de uso de cada célula, de forma que tons mais próximos do amarelo representam células com maior frequência. A cor branca indica células que não foram usadas para chegar à resposta (isso inclui a própria resposta).
+
+Ao final do preenchimento da matriz, ela é percorrida usando backtracking e a resposta final é gerada.
